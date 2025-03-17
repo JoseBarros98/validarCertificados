@@ -3,8 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DiagnosticController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+
 
 // Rutas públicas
 Route::get('/', function () {
@@ -14,11 +18,14 @@ Route::get('/', function () {
 Route::post('/validate-certificate', [CertificateController::class, 'validate'])->name('certificates.validate');
 Route::get('/placeholder.svg', [App\Http\Controllers\PlaceholderController::class, 'generatePlaceholder']);
 
+// Rutas para iconos
+Route::get('/favicon.png', [App\Http\Controllers\FaviconController::class, 'favicon']);
+Route::get('/apple-touch-icon.png', [App\Http\Controllers\FaviconController::class, 'appleTouchIcon']);
+
 // Rutas autenticadas
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    // Dashboard con datos reales
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Rutas de perfil (accesibles para todos los usuarios autenticados)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -35,23 +42,21 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
     });
 
-    // Rutas de certificados
-    Route::prefix('admin/certificates')->name('admin.certificates.')->group(function () {
-        // Listado de certificados
-        Route::get('/', [CertificateController::class, 'index'])->name('index');
-        
-        // IMPORTANTE: Definir la ruta de creación ANTES de las rutas con parámetros
-        Route::get('/create', [CertificateController::class, 'create'])->name('create');
-        Route::post('/', [CertificateController::class, 'store'])->name('store');
-        
-        // Rutas con parámetros
-        Route::get('/{certificate}/edit', [CertificateController::class, 'edit'])->name('edit');
-        Route::put('/{certificate}', [CertificateController::class, 'update'])->name('update');
-        Route::post('/{certificate}/toggle-status', [CertificateController::class, 'toggleStatus'])->name('toggle-status');
-        
-        // IMPORTANTE: Esta ruta debe ir AL FINAL para evitar conflictos
-        Route::get('/{certificate}', [CertificateController::class, 'show'])->name('show');
-    });
+    // Rutas de certificados usando resource
+    Route::resource('admin/certificates', CertificateController::class)
+        ->names([
+            'index' => 'admin.certificates.index',
+            'create' => 'admin.certificates.create',
+            'store' => 'admin.certificates.store',
+            'show' => 'admin.certificates.show',
+            'edit' => 'admin.certificates.edit',
+            'update' => 'admin.certificates.update',
+            'destroy' => 'admin.certificates.destroy',
+        ]);
+    
+    // Ruta adicional para toggle-status
+    Route::post('admin/certificates/{certificate}/toggle-status', [CertificateController::class, 'toggleStatus'])
+        ->name('admin.certificates.toggle-status');
 });
 
 require __DIR__.'/auth.php';

@@ -9,6 +9,11 @@ class Certificate extends Model
 {
     use HasFactory;
 
+    /**
+     * Los atributos que son asignables en masa.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'code',
         'student_name',
@@ -17,4 +22,14 @@ class Certificate extends Model
         'status',
         'certificate_image',
     ];
+
+    /**
+     * Los atributos que deben convertirse a tipos nativos.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'issue_date' => 'date',
+    ];
 }
+

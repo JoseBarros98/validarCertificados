@@ -50,22 +50,14 @@ export default function Authenticated({ user, header, children }) {
               <div className="shrink-0 flex items-center">
                 <Link href="/">
                   <div className="flex items-center">
-                    <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center mr-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-6 h-6 text-white"
-                      >
-                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-                      </svg>
-                    </div>
-                    <span className="text-xl font-bold text-orange-800">ISPI</span>
+                    
+                      {/* Nuevo icono personalizado */}
+                      <img
+                                    src="/imagenes/logo.png"
+                                    alt="ISPI Logo"
+                                    className="h-12 w-auto"
+                                />
+                      
                   </div>
                 </Link>
               </div>
@@ -134,7 +126,6 @@ export default function Authenticated({ user, header, children }) {
                   </Dropdown.Trigger>
 
                   <Dropdown.Content>
-                    <Dropdown.Link href={route("profile.edit")}>Perfil</Dropdown.Link>
                     <Dropdown.Link href={route("logout")} method="post" as="button">
                       Cerrar Sesión
                     </Dropdown.Link>

@@ -3,32 +3,8 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { Head, Link } from "@inertiajs/react"
 import { route } from "ziggy-js"
-import { useState, useEffect } from "react"
 
-export default function Dashboard({ auth }) {
-  const [stats, setStats] = useState({
-    totalCertificates: 0,
-    validCertificates: 0,
-    invalidCertificates: 0,
-    recentActivity: [],
-  })
-
-  // Simulación de datos para el dashboard
-  useEffect(() => {
-    // En un caso real, estos datos vendrían de una API
-    setStats({
-      totalCertificates: 124,
-      validCertificates: 112,
-      invalidCertificates: 12,
-      recentActivity: [
-        { id: 1, action: "Certificado creado", user: "Admin", date: "2023-03-15", certificate: "CERT-2023-001" },
-        { id: 2, action: "Certificado validado", user: "Sistema", date: "2023-03-14", certificate: "CERT-2023-002" },
-        { id: 3, action: "Certificado invalidado", user: "Admin", date: "2023-03-13", certificate: "CERT-2023-003" },
-        { id: 4, action: "Certificado creado", user: "Admin", date: "2023-03-12", certificate: "CERT-2023-004" },
-      ],
-    })
-  }, [])
-
+export default function Dashboard({ auth, stats }) {
   // Verificar si el usuario tiene un permiso específico
   const hasPermission = (permission) => {
     // Verificación más robusta para evitar errores
@@ -210,29 +186,6 @@ export default function Dashboard({ auth }) {
                       <span className="text-gray-700">Ver Página Principal</span>
                     </Link>
 
-                    {/* <Link
-                      href={route("profile.edit")}
-                      className="flex items-center p-3 bg-orange-50 hover:bg-orange-100 rounded-md transition-colors"
-                    >
-                      <div className="p-2 bg-orange-100 rounded-md mr-3">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-orange-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
-                      </div>
-                      <span className="text-gray-700">Editar Perfil</span>
-                    </Link> */}
-
                     {hasPermission("create users") && (
                       <Link
                         href={route("admin.users.index")}
@@ -268,10 +221,6 @@ export default function Dashboard({ auth }) {
 
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Versión</span>
-                      <span className="text-gray-800 font-medium">1.0.0</span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-gray-600">Último Acceso</span>
                       <span className="text-gray-800 font-medium">{new Date().toLocaleDateString()}</span>
                     </div>
@@ -284,6 +233,10 @@ export default function Dashboard({ auth }) {
                       <span className="text-gray-800 font-medium">
                         {auth.user.roles && auth.user.roles.length > 0 ? auth.user.roles[0] : "Sin rol"}
                       </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Usuarios</span>
+                      <span className="text-gray-800 font-medium">{stats.userCount || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -317,7 +270,7 @@ export default function Dashboard({ auth }) {
                             scope="col"
                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                           >
-                            Usuario
+                            Estudiante
                           </th>
                           <th
                             scope="col"
@@ -328,18 +281,28 @@ export default function Dashboard({ auth }) {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {stats.recentActivity.map((activity) => (
-                          <tr key={activity.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {activity.action}
+                        {stats.recentActivity && stats.recentActivity.length > 0 ? (
+                          stats.recentActivity.map((activity, index) => (
+                            <tr key={index}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {activity.action}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {activity.certificate}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {activity.student_name}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{activity.date}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
+                              No hay actividad reciente.
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {activity.certificate}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{activity.user}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{activity.date}</td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -351,28 +314,90 @@ export default function Dashboard({ auth }) {
                 <div className="p-6 border-b border-gray-200">
                   <h3 className="text-lg font-medium text-orange-800 mb-4">Resumen de Certificados</h3>
 
-                  <div className="flex items-center justify-center h-64">
-                    {/* Aquí se podría integrar un gráfico con Chart.js o similar */}
-                    <div className="flex items-center space-x-8">
-                      <div className="flex flex-col items-center">
-                        <div className="w-32 h-32 rounded-full border-8 border-orange-500 flex items-center justify-center">
-                          <span className="text-3xl font-bold text-orange-800">
-                            {Math.round((stats.validCertificates / stats.totalCertificates) * 100)}%
-                          </span>
+                  {stats.totalCertificates > 0 ? (
+                    <div className="flex items-center justify-center h-64">
+                      <div className="flex items-center space-x-8">
+                        <div className="flex flex-col items-center">
+                          <div className="w-32 h-32 rounded-full border-8 border-orange-500 flex items-center justify-center">
+                            <span className="text-3xl font-bold text-orange-800">
+                              {Math.round((stats.validCertificates / stats.totalCertificates) * 100)}%
+                            </span>
+                          </div>
+                          <span className="mt-2 text-gray-600">Certificados Válidos</span>
                         </div>
-                        <span className="mt-2 text-gray-600">Certificados Válidos</span>
-                      </div>
 
-                      <div className="flex flex-col items-center">
-                        <div className="w-32 h-32 rounded-full border-8 border-red-500 flex items-center justify-center">
-                          <span className="text-3xl font-bold text-red-800">
-                            {Math.round((stats.invalidCertificates / stats.totalCertificates) * 100)}%
-                          </span>
+                        <div className="flex flex-col items-center">
+                          <div className="w-32 h-32 rounded-full border-8 border-red-500 flex items-center justify-center">
+                            <span className="text-3xl font-bold text-red-800">
+                              {Math.round((stats.invalidCertificates / stats.totalCertificates) * 100)}%
+                            </span>
+                          </div>
+                          <span className="mt-2 text-gray-600">Certificados Inválidos</span>
                         </div>
-                        <span className="mt-2 text-gray-600">Certificados Inválidos</span>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-64">
+                      <p className="text-gray-500">No hay certificados registrados aún.</p>
+                    </div>
+                  )}
+
+                  {/* Distribución por mes */}
+                  {stats.certificatesByMonth && stats.certificatesByMonth.length > 0 && (
+                    <div className="mt-8">
+                      <h4 className="text-md font-medium text-gray-700 mb-4">Certificados por mes</h4>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                              >
+                                Mes
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                              >
+                                Válidos
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                              >
+                                Inválidos
+                              </th>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                              >
+                                Total
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {stats.certificatesByMonth.map((item, index) => (
+                              <tr key={index}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  {item.month} {item.year}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
+                                  {item.valid}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
+                                  {item.invalid}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                  {item.total}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

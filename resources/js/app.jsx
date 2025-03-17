@@ -11,10 +11,10 @@ import { Ziggy } from "./ziggy"
 // Configura Ziggy globalmente
 window.Ziggy = Ziggy
 
-const appName = window.document.getElementsByTagName("title")[0]?.innerText || "Laravel"
+const appName = window.document.getElementsByTagName("title")[0]?.innerText || "Validar Certificados"
 
 createInertiaApp({
-  title: (title) => `${title} - ${appName}`,
+  title: (title) => `${title}`,
   resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob("./Pages/**/*.jsx")),
   setup({ el, App, props }) {
     const root = createRoot(el)

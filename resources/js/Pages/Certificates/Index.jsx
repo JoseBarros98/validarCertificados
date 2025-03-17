@@ -87,7 +87,7 @@ export default function Index({ auth }) {
 
     return (
         <div className="bg-orange-50 min-h-screen">
-            <Head title="Validador de Certificados - ISPI" />
+            <Head title="Validar Certificados - ISPI" />
 
             {/* Header */}
             <header className="bg-white border-b border-orange-200 shadow-sm">
@@ -153,6 +153,55 @@ export default function Index({ auth }) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-600/30 to-transparent"></div>
             </div>
+            
+            {/* Academic Offer */}
+            <section className="py-16 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 className="text-3xl font-bold mb-4 text-gray-800">
+                        Oferta académica
+                    </h2>
+                    <div className="w-20 h-1 bg-orange-500 mb-12 rounded-full"></div>
+                    <div className="grid md:grid-cols-2 gap-8">
+                        <a
+                            href="https://ispi.edu.pa/oferta-academica/diplomados/area-tecnologia.aspx"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block group cursor-pointer transform transition-transform hover:scale-105"
+                        >
+                            <div className="aspect-w-16 aspect-h-9 mb-4 overflow-hidden rounded-lg shadow-md">
+                                <img
+                                    src="/imagenes/diplomados.png"
+                                    alt="Diplomados"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-orange-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </div>
+                            <h3 className="text-xl font-semibold mb-2 text-orange-700 group-hover:text-gray-800">
+                                Diplomados
+                            </h3>
+                        </a>
+                        <a
+                            href="https://ispi.edu.pa/oferta-academica/tecnicos-superiores.aspx"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block group cursor-pointer transform transition-transform hover:scale-105"
+                        >
+                            <div className="aspect-w-16 aspect-h-9 mb-4 overflow-hidden rounded-lg shadow-md">
+                                <img
+                                    src="/imagenes/carreras.png"
+                                    alt="Técnico Superior"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-orange-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </div>
+                            <h3 className="text-xl font-semibold mb-2 text-orange-700 group-hover:text-gray-800">
+                                Técnico Superior
+                            </h3>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             {/* Certificate Validation */}
             <section className="py-16 bg-gradient-to-b from-orange-50 to-orange-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -342,65 +391,22 @@ export default function Index({ auth }) {
                 </div>
             </section>
 
-            {/* Academic Offer */}
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-3xl font-bold mb-4 text-gray-800">
-                        Oferta académica
-                    </h2>
-                    <div className="w-20 h-1 bg-orange-500 mb-12 rounded-full"></div>
-                    <div className="grid md:grid-cols-2 gap-8">
-                        <a
-                            href="https://ispi.edu.pa/oferta-academica/diplomados/area-tecnologia.aspx"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block group cursor-pointer transform transition-transform hover:scale-105"
-                        >
-                            <div className="aspect-w-16 aspect-h-9 mb-4 overflow-hidden rounded-lg shadow-md">
-                                <img
-                                    src="/imagenes/diplomados.png"
-                                    alt="Diplomados"
-                                    className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-orange-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-2 text-orange-700 group-hover:text-gray-800">
-                                Diplomados
-                            </h3>
-                        </a>
-                        <a
-                            href="https://ispi.edu.pa/oferta-academica/tecnicos-superiores.aspx"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block group cursor-pointer transform transition-transform hover:scale-105"
-                        >
-                            <div className="aspect-w-16 aspect-h-9 mb-4 overflow-hidden rounded-lg shadow-md">
-                                <img
-                                    src="/imagenes/carreras.png"
-                                    alt="Técnico Superior"
-                                    className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-orange-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-2 text-orange-700 group-hover:text-gray-800">
-                                Técnico Superior
-                            </h3>
-                        </a>
-                    </div>
-                </div>
-            </section>
-
             {/* Footer */}
             <footer className="bg-[#312d2d] text-white">
                 <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div>
-                            <h3 className="text-lg font-semibold mb-4 text-white">
-                                ISPI
-                            </h3>
-                            <p className="text-white text-sm">
-                                Instituto Superior Politécnico Internacional
-                            </p>
+                        <a
+                                href="https://ispi.edu.pa/default.aspx"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <img
+                                    src="/imagenes/logo-blanco.png"
+                                    alt="ISPI Logo"
+                                    className="h-16 w-auto"
+                                />
+                            </a>
                         </div>
                         <div>
                             <h4 className="text-sm font-semibold text-white mb-4">

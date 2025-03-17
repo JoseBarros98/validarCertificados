@@ -5,7 +5,7 @@ import Checkbox from "@/Components/Checkbox"
 import InputError from "@/Components/InputError"
 import InputLabel from "@/Components/InputLabel"
 import TextInput from "@/Components/TextInput"
-import { Head, Link, useForm, router } from "@inertiajs/react"
+import { Head, Link, useForm, router, usePage } from "@inertiajs/react"
 
 export default function Login({ status, canResetPassword }) {
   const { data, setData, post, processing, errors, reset } = useForm({
@@ -15,6 +15,7 @@ export default function Login({ status, canResetPassword }) {
   })
 
   const [showPassword, setShowPassword] = useState(false)
+  const { route } = usePage().props
 
   useEffect(() => {
     return () => {
