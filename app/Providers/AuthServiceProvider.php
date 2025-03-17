@@ -24,19 +24,6 @@ class AuthServiceProvider extends ServiceProvider
     {
         // Registrar los permisos como Gates
         $this->registerPermissions();
-        
-        // Registrar los roles como Gates
-        Gate::define('super-admin', function (User $user) {
-            return $user->hasRole('super-admin');
-        });
-        
-        Gate::define('certificate-manager', function (User $user) {
-            return $user->hasRole('certificate-manager');
-        });
-        
-        Gate::define('certificate-viewer', function (User $user) {
-            return $user->hasRole('certificate-viewer');
-        });
     }
     
     protected function registerPermissions(): void
