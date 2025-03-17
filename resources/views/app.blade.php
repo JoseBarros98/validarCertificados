@@ -26,8 +26,7 @@
               <title inertia>{{ config('app.name') }}</title>
         
               <!-- Favicon -->
-              <link rel="icon" type="image/png" src="/imagenes/logo.png">
-              <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+              <link rel="icon" type="image/png" src="public/imagenes/logo.png">
         
               <!-- Fonts -->
               <link rel="preconnect" href="https://fonts.bunny.net">

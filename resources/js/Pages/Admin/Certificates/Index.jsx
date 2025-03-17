@@ -20,6 +20,13 @@ export default function Index({ auth, certificates, flash }) {
     }
   }
 
+  const hasPermission = (permission) => {
+    if (!auth || !auth.user || !auth.user.permissions){
+      console.log("Usuario o permisos no definidos:", auth?.user)
+      return false
+    }
+    return auth.user.permissions.includes(permission)
+  }
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -35,12 +42,14 @@ export default function Index({ auth, certificates, flash }) {
 
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-medium text-gray-900">Lista de Certificados</h3>
+                {hasPermission("create certificates") &&(
                 <Link
                   href={route("admin.certificates.create")}
                   className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
                   Añadir Certificado
                 </Link>
+                )}
               </div>
 
               <div className="overflow-x-auto">
@@ -139,12 +148,15 @@ export default function Index({ auth, certificates, flash }) {
                             >
                               Ver QR
                             </Link>
+                            {hasPermission("edit certificates")&&(
                             <Link
                               href={route("admin.certificates.edit", certificate.id)}
                               className="text-primary-600 hover:text-primary-900 mr-4"
                             >
                               Editar
                             </Link>
+                            )}
+                            {hasPermission( "toggle certificate status")&&(
                             <button
                               onClick={() => handleToggleStatus(certificate.id, certificate.status)}
                               className={`${
@@ -155,6 +167,7 @@ export default function Index({ auth, certificates, flash }) {
                             >
                               {certificate.status === "valid" ? "Invalidar" : "Validar"}
                             </button>
+                            )}
                           </td>
                         </tr>
                       ))

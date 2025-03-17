@@ -25,7 +25,7 @@ export default function Login({ status, canResetPassword }) {
 
   const submit = (e) => {
     e.preventDefault()
-    router.post(route("login"), data)
+    router.post("login", data)
   }
 
   return (
@@ -34,23 +34,11 @@ export default function Login({ status, canResetPassword }) {
 
       <div className="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-20 h-20 bg-orange-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-10 h-10 text-white"
-            >
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-              <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-orange-800">ISPI</h1>
-          <p className="text-gray-600 text-sm">Instituto Superior Politécnico Internacional</p>
+        <img
+            src="/imagenes/logo.png"
+            alt="ISPI Logo"
+            className="h-16 w-auto"
+        />
         </div>
 
         {status && <div className="mb-4 font-medium text-sm text-green-600">{status}</div>}
@@ -124,28 +112,10 @@ export default function Login({ status, canResetPassword }) {
             <InputError message={errors.password} className="mt-2" />
           </div>
 
-          <div className="block mt-4">
-            <label className="flex items-center">
-              <Checkbox
-                name="remember"
-                checked={data.remember}
-                onChange={(e) => setData("remember", e.target.checked)}
-                className="rounded border-orange-300 text-orange-600 shadow-sm focus:ring-orange-500"
-              />
-              <span className="ml-2 text-sm text-gray-600">Recordarme</span>
-            </label>
-          </div>
+          
 
           <div className="flex items-center justify-end mt-4">
-            {canResetPassword && (
-              <Link
-                href={route("password.request")}
-                className="underline text-sm text-orange-600 hover:text-orange-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-              >
-                ¿Olvidaste tu contraseña?
-              </Link>
-            )}
-
+            
             <button
               type="submit"
               className="ml-4 inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 active:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150"
@@ -159,7 +129,7 @@ export default function Login({ status, canResetPassword }) {
 
       <div className="mt-8 text-center">
         <Link
-          href={route("home")}
+          href="/"
           className="text-sm text-orange-600 hover:text-orange-900 flex items-center justify-center"
         >
           <svg

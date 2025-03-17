@@ -53,10 +53,10 @@ export default function Authenticated({ user, header, children }) {
                     
                       {/* Nuevo icono personalizado */}
                       <img
-                                    src="/imagenes/logo.png"
-                                    alt="ISPI Logo"
-                                    className="h-12 w-auto"
-                                />
+                        src="/imagenes/logo.png"
+                        alt="ISPI Logo"
+                        className="h-12 w-auto"
+                      />
                       
                   </div>
                 </Link>
@@ -221,7 +221,6 @@ export default function Authenticated({ user, header, children }) {
             <div className="text-sm text-gray-500">
               © {new Date().getFullYear()} Instituto Superior Politécnico Internacional
             </div>
-            <div className="text-sm text-gray-500">Panel de Administración v1.0.0</div>
           </div>
         </div>
       </footer>

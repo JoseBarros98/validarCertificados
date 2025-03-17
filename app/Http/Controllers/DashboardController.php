@@ -70,37 +70,41 @@ class DashboardController extends Controller
      * Obtiene la distribución de certificados por mes (últimos 6 meses)
      */
     private function getCertificatesByMonth()
-    {
-        $months = collect([]);
-        
-        // Obtener datos para los últimos 6 meses
-        for ($i = 2; $i >= 0; $i--) {
-            $date = now()->subMonths($i);
-            $monthName = $date->format('M');
-            $year = $date->format('Y');
-            $monthStart = $date->startOfMonth()->format('Y-m-d');
-            $monthEnd = $date->endOfMonth()->format('Y-m-d');
-            
-            $validCount = Certificate::where('status', 'valid')
-                ->whereNotNull('created_at')
-                ->whereBetween('created_at', [$monthStart, $monthEnd])
-                ->count();
-                
-            $invalidCount = Certificate::where('status', 'invalid')
-                ->whereNotNull('created_at')
-                ->whereBetween('created_at', [$monthStart, $monthEnd])
-                ->count();
-                
-            $months->push([
-                'month' => $monthName,
-                'year' => $year,
-                'valid' => $validCount,
-                'invalid' => $invalidCount,
-                'total' => $validCount + $invalidCount
-            ]);
-        }
-        
-        return $months;
+{
+    
+    \Carbon\Carbon::setLocale('es');
+
+    $months = collect([]);
+
+    // Obtener datos para los últimos 3 meses
+    for ($i = 2; $i >= 0; $i--) {
+        $date = now()->subMonths($i);
+        $monthName = ucfirst($date->translatedFormat('F'));
+        $year = $date->format('Y');
+        $monthStart = $date->startOfMonth()->format('Y-m-d');
+        $monthEnd = $date->endOfMonth()->format('Y-m-d');
+
+        $validCount = Certificate::where('status', 'valid')
+            ->whereNotNull('created_at')
+            ->whereBetween('created_at', [$monthStart, $monthEnd])
+            ->count();
+
+        $invalidCount = Certificate::where('status', 'invalid')
+            ->whereNotNull('created_at')
+            ->whereBetween('created_at', [$monthStart, $monthEnd])
+            ->count();
+
+        $months->push([
+            'month' => $monthName,
+            'year' => $year,
+            'valid' => $validCount,
+            'invalid' => $invalidCount,
+            'total' => $validCount + $invalidCount
+        ]);
     }
+
+    return $months;
+}
+
 }
 
