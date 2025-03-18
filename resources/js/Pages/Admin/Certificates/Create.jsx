@@ -7,9 +7,11 @@ import TextInput from "@/Components/TextInput"
 import { router } from "@inertiajs/react"
 import { route } from "ziggy-js"
 import { useState } from "react"
+import { useSweetAlert } from "@/hooks/useSweetAlert"
 
 export default function Create({ auth }) {
   const [imagePreview, setImagePreview] = useState(null)
+  const sweetAlert = useSweetAlert()
 
   const { data, setData, errors, processing } = useForm({
     code: "",
@@ -24,6 +26,12 @@ export default function Create({ auth }) {
     e.preventDefault()
     router.post(route("admin.certificates.store"), data, {
       forceFormData: true,
+      onSuccess: () => {
+        sweetAlert.success("Certificado creado correctamente")
+      },
+      onError: () => {
+        sweetAlert.error("Error al crear el certificado")
+      },
     })
   }
 

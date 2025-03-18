@@ -6,6 +6,7 @@ import InputLabel from "@/Components/InputLabel"
 import TextInput from "@/Components/TextInput"
 import { router } from "@inertiajs/react"
 import { route } from "ziggy-js"
+import { useSweetAlert } from "@/hooks/useSweetAlert"
 
 export default function Edit({ auth, user, roles, userRole }) {
   const { data, setData, errors, processing } = useForm({
@@ -17,9 +18,18 @@ export default function Edit({ auth, user, roles, userRole }) {
     _method: "PUT",
   })
 
+  const sweetAlert = useSweetAlert()
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    router.post(route("admin.users.update", user.id), data)
+    router.post(route("admin.users.update", user.id), data, {
+      onSuccess: () => {
+        sweetAlert.success("Usuario actualizado correctamente")
+      },
+      onError: () => {
+        sweetAlert.error("Error al actualizar el usuario")
+      },
+    })
   }
 
   return (

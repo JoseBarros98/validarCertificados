@@ -16,11 +16,24 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // Cargar usuarios con sus roles de manera más segura
-            $users = User::with('roles')->get()->map(function ($user) {
+            $search = $request->input('search');
+            
+            // Consulta base
+            $query = User::query()->with('roles');
+            
+            // Aplicar filtro de búsqueda si existe
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+            
+            // Obtener usuarios
+            $users = $query->get()->map(function ($user) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -35,7 +48,10 @@ class UserController extends Controller
             });
             
             return Inertia::render('Admin/Users/Index', [
-                'users' => $users
+                'users' => $users,
+                'filters' => [
+                    'search' => $search,
+                ]
             ]);
         } catch (\Exception $e) {
             Log::error('Error en UserController@index: ' . $e->getMessage());

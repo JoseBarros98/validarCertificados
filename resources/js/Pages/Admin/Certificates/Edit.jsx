@@ -7,11 +7,14 @@ import TextInput from "@/Components/TextInput"
 import { router } from "@inertiajs/react"
 import { route } from "ziggy-js"
 import { useState } from "react"
+import { useSweetAlert } from "@/hooks/useSweetAlert"
 
 export default function Edit({ auth, certificate }) {
   const [imagePreview, setImagePreview] = useState(
     certificate && certificate.certificate_image ? `/storage/${certificate.certificate_image}` : null,
   )
+
+  const sweetAlert = useSweetAlert()
 
   const { data, setData, errors, processing } = useForm({
     code: certificate ? certificate.code || "" : "",
@@ -28,6 +31,12 @@ export default function Edit({ auth, certificate }) {
     e.preventDefault()
     router.post(route("admin.certificates.update", certificate.id), data, {
       forceFormData: true,
+      onSuccess: () => {
+        sweetAlert.success("Certificado actualizado correctamente")
+      },
+      onError: () => {
+        sweetAlert.error("Error al actualizar el certificado")
+      },
     })
   }
 

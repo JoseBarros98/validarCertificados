@@ -1,14 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Dropdown from "@/Components/Dropdown"
 import NavLink from "@/Components/NavLink"
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink"
 import { Link } from "@inertiajs/react"
 import { route } from "ziggy-js"
+import { useSweetAlert } from "@/hooks/useSweetAlert"
 
-export default function Authenticated({ user, header, children }) {
+export default function Authenticated({ user, header, children, flash }) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false)
+  const sweetAlert = useSweetAlert()
+
+  // Mostrar notificaciones flash
+  useEffect(() => {
+    if (flash?.message) {
+      sweetAlert.success(flash.message)
+    }
+    if (flash?.error) {
+      sweetAlert.error(flash.error)
+    }
+  }, [flash])
 
   // Verificar si el usuario está definido
   if (!user) {
@@ -50,14 +62,11 @@ export default function Authenticated({ user, header, children }) {
               <div className="shrink-0 flex items-center">
                 <Link href="/">
                   <div className="flex items-center">
-                    
-                      {/* Nuevo icono personalizado */}
-                      <img
-                        src="/imagenes/logo.png"
-                        alt="ISPI Logo"
-                        className="h-12 w-auto"
-                      />
-                      
+                    <img
+                      src="/imagenes/logo.png"
+                      alt="ISPI Logo"
+                      className="h-12 w-auto"
+                    />
                   </div>
                 </Link>
               </div>
@@ -126,6 +135,7 @@ export default function Authenticated({ user, header, children }) {
                   </Dropdown.Trigger>
 
                   <Dropdown.Content>
+                    <Dropdown.Link href={route("profile.edit")}>Perfil</Dropdown.Link>
                     <Dropdown.Link href={route("logout")} method="post" as="button">
                       Cerrar Sesión
                     </Dropdown.Link>
@@ -221,10 +231,10 @@ export default function Authenticated({ user, header, children }) {
             <div className="text-sm text-gray-500">
               © {new Date().getFullYear()} Instituto Superior Politécnico Internacional
             </div>
+            <div className="text-sm text-gray-500">Panel de Administración v1.0.0</div>
           </div>
         </div>
       </footer>
     </div>
   )
 }
-

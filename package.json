@@ -25,6 +25,7 @@
         "html5-qrcode": "^2.3.8",
         "lucide-react": "^0.479.0",
         "qrcode.react": "^4.2.0",
+        "sweetalert2": "^11.17.2",
         "tailwindcss-animate": "^1.0.7",
         "ziggy-js": "^2.5.2"
     }

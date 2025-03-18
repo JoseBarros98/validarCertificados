@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Certificate;
-use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+
+use Illuminate\Routing\Controller;
 
 class CertificateController extends Controller
 {
@@ -24,12 +25,40 @@ class CertificateController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $certificates = Certificate::all();
+        $search = $request->input('search');
+        $status = $request->input('status');
+        
+        // Consulta base
+        $query = Certificate::query();
+        
+        // Aplicar filtro de búsqueda si existe
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                  ->orWhere('student_name', 'like', "%{$search}%")
+                  ->orWhere('course_name', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filtrar por estado si se especifica
+        if ($status && in_array($status, ['valid', 'invalid'])) {
+            $query->where('status', $status);
+        }
+        
+        // Ordenar por fecha de emisión descendente
+        $query->orderBy('issue_date', 'desc');
+        
+        // Obtener certificados
+        $certificates = $query->get();
         
         return Inertia::render('Admin/Certificates/Index', [
-            'certificates' => $certificates
+            'certificates' => $certificates,
+            'filters' => [
+                'search' => $search,
+                'status' => $status,
+            ]
         ]);
     }
 

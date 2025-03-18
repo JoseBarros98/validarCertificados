@@ -6,6 +6,7 @@ import InputLabel from "@/Components/InputLabel"
 import TextInput from "@/Components/TextInput"
 import { router } from "@inertiajs/react"
 import { route } from "ziggy-js"
+import { useSweetAlert } from "@/hooks/useSweetAlert"
 
 export default function Create({ auth, roles }) {
   const { data, setData, errors, processing } = useForm({
@@ -16,9 +17,18 @@ export default function Create({ auth, roles }) {
     role: "",
   })
 
+  const sweetAlert = useSweetAlert()
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    router.post(route("admin.users.store"), data)
+    router.post(route("admin.users.store"), data, {
+      onSuccess: () => {
+        sweetAlert.success("Usuario creado correctamente")
+      },
+      onError: () => {
+        sweetAlert.error("Error al crear el usuario")
+      },
+    })
   }
 
   return (
