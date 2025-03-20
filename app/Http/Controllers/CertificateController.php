@@ -5,21 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\Certificate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use App\Services\CertificateImageService;
 
 use Illuminate\Routing\Controller;
 
 class CertificateController extends Controller
 {
+    protected $certificateImageService;
+
     /**
-     * Constructor para aplicar middleware de permisos
+     * Constructor para aplicar middleware de permisos e inyectar servicios
      */
-    public function __construct()
+    public function __construct(CertificateImageService $certificateImageService)
     {
         $this->middleware('can:view certificates')->only(['index', 'show']);
         $this->middleware('can:create certificates')->only(['create', 'store']);
         $this->middleware('can:edit certificates')->only(['edit', 'update']);
         $this->middleware('can:toggle certificate status')->only(['toggleStatus']);
+        
+        $this->certificateImageService = $certificateImageService;
     }
 
     /**
@@ -92,8 +98,20 @@ class CertificateController extends Controller
         $certificate->status = $validated['status'];
 
         if ($request->hasFile('certificate_image')) {
+            // Guardar la imagen original
             $path = $request->file('certificate_image')->store('certificates', 'public');
-            $certificate->certificate_image = $path;
+            
+            // Añadir el QR a la imagen
+            $pathWithQr = $this->certificateImageService->addQrCodeToImage($path, $certificate->code);
+            
+            // Si se procesó correctamente, usar la nueva imagen
+            if ($pathWithQr) {
+                // Eliminar la imagen original
+                Storage::disk('public')->delete($path);
+                $certificate->certificate_image = $pathWithQr;
+            } else {
+                $certificate->certificate_image = $path;
+            }
         }
 
         $certificate->save();
@@ -147,8 +165,20 @@ class CertificateController extends Controller
                 Storage::disk('public')->delete($certificate->certificate_image);
             }
             
+            // Guardar la nueva imagen
             $path = $request->file('certificate_image')->store('certificates', 'public');
-            $certificate->certificate_image = $path;
+            
+            // Añadir el QR a la imagen
+            $pathWithQr = $this->certificateImageService->addQrCodeToImage($path, $certificate->code);
+            
+            // Si se procesó correctamente, usar la nueva imagen
+            if ($pathWithQr) {
+                // Eliminar la imagen original
+                Storage::disk('public')->delete($path);
+                $certificate->certificate_image = $pathWithQr;
+            } else {
+                $certificate->certificate_image = $path;
+            }
         }
 
         $certificate->save();
@@ -159,13 +189,28 @@ class CertificateController extends Controller
     /**
      * Toggle the status of the certificate.
      */
-    public function toggleStatus(Certificate $certificate)
-    {
-        $certificate->status = $certificate->status === 'valid' ? 'invalid' : 'valid';
+    public function toggleStatus($id)
+{
+    try {
+        // Buscar el certificado
+        $certificate = Certificate::findOrFail($id);
+        
+        // Cambiar el estado
+        $certificate->status = ($certificate->status === 'valid') ? 'invalid' : 'valid';
         $certificate->save();
-
-        return redirect()->route('admin.certificates.index')->with('message', 'Estado del certificado actualizado correctamente.');
+        
+        // Registrar la acción
+        Log::info("Estado de certificado cambiado: ID={$id}, Código={$certificate->code}, Nuevo estado={$certificate->status}");
+        
+        // Redirigir con mensaje de éxito
+        return back()->with('success', 'Estado del certificado actualizado exitosamente.');
+    } catch (\Exception $e) {
+        // Registrar el error
+        Log::error("Error al cambiar estado del certificado: " . $e->getMessage());
+        
+        return back()->with('error', 'Error al cambiar el estado del certificado: ' . $e->getMessage());
     }
+}
 
     /**
      * Validate a certificate.
@@ -193,5 +238,92 @@ class CertificateController extends Controller
                 : 'Este certificado ha sido invalidado o revocado.'
         ]);
     }
+
+    public function download($id)
+    {
+        try {
+            // Buscar el certificado
+            $certificate = Certificate::findOrFail($id);
+            
+            // Verificar si existe la imagen con QR
+            $imagePath = $certificate->image_with_qr;
+            
+            // Si no existe la imagen con QR, generarla
+            if (!$imagePath || !Storage::disk('public')->exists($imagePath)) {
+                // Verificar si existe la imagen original
+                if (!$certificate->certificate_image || !Storage::disk('public')->exists($certificate->certificate_image)) {
+                    return back()->with('error', 'No se encontró la imagen del certificado.');
+                }
+                
+                // Generar la imagen con QR
+                $certificateImageService = new CertificateImageService();
+                $imagePath = $certificateImageService->addQrCodeToImage($certificate->certificate_image, $certificate->code);
+                
+                // Verificar si se generó correctamente
+                if (!$imagePath) {
+                    return back()->with('error', 'No se pudo generar la imagen con QR.');
+                }
+                
+                // Actualizar el certificado con la nueva ruta
+                $certificate->image_with_qr = $imagePath;
+                $certificate->save();
+            }
+            
+            // Verificar si existe la imagen después de intentar generarla
+            if (!$imagePath || !Storage::disk('public')->exists($imagePath)) {
+                return back()->with('error', 'No se pudo generar la imagen del certificado.');
+            }
+            
+            // Obtener la ruta completa del archivo
+            $fullPath = Storage::disk('public')->path($imagePath);
+            
+            // Normalizar la ruta (convertir todas las barras a la misma dirección)
+            $fullPath = str_replace('\\', '/', $fullPath);
+            
+            // Verificar si el archivo existe físicamente
+            if (!file_exists($fullPath)) {
+                // Registrar el error
+                Log::error("Archivo no encontrado: {$fullPath}");
+                return back()->with('error', 'El archivo físico no existe.');
+            }
+            
+            // Determinar el tipo MIME basado en la extensión
+            $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
+            
+            // Mapeo de extensiones a tipos MIME
+            $mimeTypes = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'bmp' => 'image/bmp',
+                'webp' => 'image/webp'
+            ];
+            
+            $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+            
+            // Nombre para la descarga
+            $downloadName = "certificado_{$certificate->code}.{$extension}";
+            
+            // Registrar información de depuración
+            Log::info("Descargando certificado: ID={$id}, Ruta={$fullPath}, Nombre={$downloadName}, MIME={$mimeType}");
+            
+            // Usar el método file() para enviar el archivo
+            return response()->file($fullPath, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'attachment; filename="' . $downloadName . '"',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0'
+            ]);
+        } catch (\Exception $e) {
+            // Registrar el error
+            Log::error("Error al descargar certificado: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return back()->with('error', 'Error al descargar el certificado: ' . $e->getMessage());
+        }
+    }
+
 }
 

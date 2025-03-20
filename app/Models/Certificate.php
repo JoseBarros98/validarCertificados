@@ -21,6 +21,7 @@ class Certificate extends Model
         'issue_date',
         'status',
         'certificate_image',
+        'image_with_qr'
     ];
 
     /**

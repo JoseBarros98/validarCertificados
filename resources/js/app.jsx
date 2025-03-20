@@ -8,6 +8,9 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers"
 // Importa Ziggy una sola vez
 import { Ziggy } from "./ziggy"
 
+// Importar SweetAlert2 para estilos globales
+import "sweetalert2/dist/sweetalert2.min.css"
+
 // Configura Ziggy globalmente
 window.Ziggy = Ziggy
 

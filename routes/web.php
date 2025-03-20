@@ -3,17 +3,19 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\DiagnosticController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-
 
 // Rutas públicas
 Route::get('/', function () {
     return Inertia::render('Certificates/Index');
 })->name('home');
+
+// Ruta para descargar las imágenes de los certificados
+Route::get('/certificates/download/{id}', [CertificateController::class, 'download'])
+    ->name('certificates.download')
+    ->middleware('web'); // Asegurarse de que usa el middleware web
 
 Route::post('/validate-certificate', [CertificateController::class, 'validate'])->name('certificates.validate');
 Route::get('/placeholder.svg', [App\Http\Controllers\PlaceholderController::class, 'generatePlaceholder']);

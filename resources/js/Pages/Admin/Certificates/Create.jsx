@@ -1,37 +1,60 @@
 "use client"
+
+import { useState } from "react"
 import { Head, useForm } from "@inertiajs/react"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import InputError from "@/Components/InputError"
 import InputLabel from "@/Components/InputLabel"
 import TextInput from "@/Components/TextInput"
-import { router } from "@inertiajs/react"
-import { route } from "ziggy-js"
-import { useState } from "react"
-import { useSweetAlert } from "@/hooks/useSweetAlert"
+import PrimaryButton from "@/Components/PrimaryButton"
+import { showLoadingAlert, closeAlert, showSuccessAlert, showErrorAlert } from "@/Components/SweetAlert"
 
 export default function Create({ auth }) {
-  const [imagePreview, setImagePreview] = useState(null)
-  const sweetAlert = useSweetAlert()
-
-  const { data, setData, errors, processing } = useForm({
+  const { data, setData, post, processing, errors, reset } = useForm({
     code: "",
     student_name: "",
     course_name: "",
     issue_date: "",
-    status: "valid",
+    status: "valid", // Valor predeterminado: válido
     certificate_image: null,
   })
 
+  const [previewUrl, setPreviewUrl] = useState(null)
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    router.post(route("admin.certificates.store"), data, {
-      forceFormData: true,
+
+    // Verificar que todos los campos requeridos estén completos
+    if (!data.code || !data.student_name || !data.course_name || !data.issue_date) {
+      showErrorAlert("Campos incompletos", "Por favor complete todos los campos requeridos")
+      return
+    }
+
+    // Mostrar alerta de carga
+    showLoadingAlert("Creando certificado...")
+
+    post("/admin/certificates", {
       onSuccess: () => {
-        sweetAlert.success("Certificado creado correctamente")
+        // Cerrar alerta de carga
+        closeAlert()
+
+        // Mostrar alerta de éxito
+        showSuccessAlert("¡Certificado creado!", "El certificado ha sido creado exitosamente.").then(() => {
+          // Redirigir a la lista de certificados
+          window.location.href = "/admin/certificates"
+        })
+
+        reset()
       },
-      onError: () => {
-        sweetAlert.error("Error al crear el certificado")
+      onError: (errors) => {
+        // Cerrar alerta de carga
+        closeAlert()
+
+        // Mostrar alerta de error
+        showErrorAlert("Error", "Ocurrió un error al crear el certificado. Por favor intente nuevamente.")
+        console.error("Error al crear certificado:", errors)
       },
+      preserveScroll: true,
     })
   }
 
@@ -41,12 +64,12 @@ export default function Create({ auth }) {
 
     if (file) {
       const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result)
+      reader.onload = (e) => {
+        setPreviewUrl(e.target.result)
       }
       reader.readAsDataURL(file)
     } else {
-      setImagePreview(null)
+      setPreviewUrl(null)
     }
   }
 
@@ -60,15 +83,16 @@ export default function Create({ auth }) {
       <div className="py-12">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div className="p-6 bg-white border-b border-gray-200">
-              <form onSubmit={handleSubmit}>
+            <div className="p-6 text-gray-900">
+              <form onSubmit={handleSubmit} encType="multipart/form-data">
                 <div className="mb-4">
                   <InputLabel htmlFor="code" value="Código del Certificado" />
                   <TextInput
                     id="code"
                     type="text"
-                    className="mt-1 block w-full"
+                    name="code"
                     value={data.code}
+                    className="mt-1 block w-full"
                     onChange={(e) => setData("code", e.target.value)}
                     required
                   />
@@ -80,8 +104,9 @@ export default function Create({ auth }) {
                   <TextInput
                     id="student_name"
                     type="text"
-                    className="mt-1 block w-full"
+                    name="student_name"
                     value={data.student_name}
+                    className="mt-1 block w-full"
                     onChange={(e) => setData("student_name", e.target.value)}
                     required
                   />
@@ -93,8 +118,9 @@ export default function Create({ auth }) {
                   <TextInput
                     id="course_name"
                     type="text"
-                    className="mt-1 block w-full"
+                    name="course_name"
                     value={data.course_name}
+                    className="mt-1 block w-full"
                     onChange={(e) => setData("course_name", e.target.value)}
                     required
                   />
@@ -106,8 +132,9 @@ export default function Create({ auth }) {
                   <TextInput
                     id="issue_date"
                     type="date"
-                    className="mt-1 block w-full"
+                    name="issue_date"
                     value={data.issue_date}
+                    className="mt-1 block w-full"
                     onChange={(e) => setData("issue_date", e.target.value)}
                     required
                   />
@@ -115,11 +142,12 @@ export default function Create({ auth }) {
                 </div>
 
                 <div className="mb-4">
-                  <InputLabel htmlFor="status" value="Estado" />
+                  <InputLabel htmlFor="status" value="Estado del Certificado" />
                   <select
                     id="status"
-                    className="mt-1 block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm"
+                    name="status"
                     value={data.status}
+                    className="mt-1 block w-full border-gray-300 focus:border-orange-500 focus:ring-orange-500 rounded-md shadow-sm"
                     onChange={(e) => setData("status", e.target.value)}
                     required
                   >
@@ -134,42 +162,30 @@ export default function Create({ auth }) {
                   <input
                     id="certificate_image"
                     type="file"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                    name="certificate_image"
+                    className="mt-1 block w-full"
                     onChange={handleImageChange}
                     accept="image/*"
                   />
-                  <p className="mt-1 text-sm text-gray-500">
-                    Sube una imagen del certificado. Esta imagen se mostrará cuando se valide el certificado.
-                  </p>
                   <InputError message={errors.certificate_image} className="mt-2" />
 
-                  {imagePreview && (
+                  {previewUrl && (
                     <div className="mt-4">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Vista previa:</p>
+                      <p className="text-sm text-gray-600 mb-2">Vista previa:</p>
                       <img
-                        src={imagePreview || "https://placehold.co/600x400/CCCCCC/666666"}
-                        alt="Vista previa del certificado"
-                        className="max-w-full h-auto max-h-64 border rounded-md"
+                        src={previewUrl || "/placeholder.svg"}
+                        alt="Vista previa"
+                        className="max-w-full h-auto max-h-64 rounded-md"
                       />
                     </div>
                   )}
                 </div>
 
                 <div className="flex items-center justify-end mt-4">
-                  <button
-                    type="button"
-                    onClick={() => router.get(route("admin.certificates.index"))}
-                    className="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 active:bg-gray-400 focus:outline-none focus:border-gray-500 focus:shadow-outline-gray transition ease-in-out duration-150 mr-2"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 active:bg-primary-700 focus:outline-none focus:border-primary-700 focus:shadow-outline-primary transition ease-in-out duration-150"
-                    disabled={processing}
-                  >
-                    Guardar Certificado
-                  </button>
+                  
+                  <PrimaryButton type="submit" disabled={processing} className="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 active:bg-orange-700 focus:outline-none focus:border-orange-700 focus:shadow-outline-orange transition ease-in-out duration-150">
+                    {processing ? "Creando..." : "Crear Certificado"}
+                  </PrimaryButton>
                 </div>
               </form>
             </div>
