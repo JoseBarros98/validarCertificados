@@ -47,6 +47,14 @@ return [
             'report' => false,
         ],
 
+        'certificates' => [
+        	'driver' => 'local',
+        	'root' => base_path('public/certificates'),
+        	'url' => env('APP_URL').'/certificates',
+        'serve' => true,
+        	'visibility' => 'public',
+    	],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

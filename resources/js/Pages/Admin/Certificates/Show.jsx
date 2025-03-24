@@ -134,11 +134,7 @@ export default function Show({ auth, certificate }) {
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Imagen del Certificado</h3>
                     <div className="border rounded-md overflow-hidden">
-                      <img
-                        src={`/storage/${certificate.certificate_image}`}
-                        alt="Certificado"
-                        className="w-full h-auto"
-                      />
+                    <img src={certificate.image_url || "/placeholder.svg"} alt="Certificate" />
                     </div>
                   </div>
                 )}

@@ -79,6 +79,12 @@ export default function Index({ auth }) {
     setScannerStarted(true)
   }
 
+  // Función para obtener la URL correcta de la imagen del certificado
+  const getCertificateImageUrl = (imageName) => {
+    // Ahora apunta directamente a la carpeta certificates en public
+    return `/certificates/${imageName}`
+  }
+
   return (
     <div className="bg-orange-50 min-h-screen">
       <Head title="Validar Certificados - ISPI" />
@@ -255,7 +261,7 @@ export default function Index({ auth }) {
                 <h3 className="text-lg font-medium text-orange-800 mb-4">Certificado:</h3>
                 <div className="relative">
                   <img
-                    src={`/storage/${result.certificate.certificate_image}`}
+                    src={getCertificateImageUrl(result.certificate.certificate_image) || "/placeholder.svg"}
                     alt="Certificado"
                     className="w-full h-auto rounded-md shadow-sm"
                   />
@@ -271,7 +277,7 @@ export default function Index({ auth }) {
                 </div>
                 <div className="mt-4 flex justify-end space-x-3">
                   <a
-                    href={`/storage/${result.certificate.certificate_image}`}
+                    href={getCertificateImageUrl(result.certificate.certificate_image)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 transition-colors"
@@ -279,11 +285,13 @@ export default function Index({ auth }) {
                     Ver certificado completo
                   </a>
                   <a
-                    href={`/certificates/download/${result.certificate.id}`}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 transition-colors"
-                  >
-                    Descargar con QR
-                  </a>
+                      href={`/api/download-certificate/${result.certificate.id}`}
+                      target="_blank"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 transition-colors"
+                      rel="noreferrer"
+                    >
+                      Descargar con QR
+                    </a>
                 </div>
               </div>
             ) : (
@@ -302,8 +310,8 @@ export default function Index({ auth }) {
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 transition-colors"
                       rel="noreferrer"
                     >
-                        Descargar certificado con QR
-                      </a>
+                      Descargar con QR
+                    </a>
                     )}
                   </div>
                 </div>
@@ -482,3 +490,4 @@ export default function Index({ auth }) {
     </div>
   )
 }
+

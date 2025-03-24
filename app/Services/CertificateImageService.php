@@ -20,7 +20,7 @@ class CertificateImageService
    public function addQrCodeToImage($imagePath, $code)
    {
        // Verificar si la imagen existe
-       if (!Storage::disk('public')->exists($imagePath)) {
+       if (!Storage::disk('certificates')->exists($imagePath)) {
            Log::error("Imagen original no encontrada: {$imagePath}");
            return null;
        }
@@ -48,7 +48,7 @@ class CertificateImageService
            file_put_contents($qrImagePath, $result->getString());
            
            // Cargar la imagen del certificado
-           $certificateImagePath = Storage::disk('public')->path($imagePath);
+           $certificateImagePath = Storage::disk('certificates')->path($imagePath);
            $certificateInfo = getimagesize($certificateImagePath);
            
            switch ($certificateInfo[2]) {
@@ -133,24 +133,24 @@ class CertificateImageService
            
            // Crear un nombre único para evitar colisiones
            $newImageName = $baseName . '_with_qr.' . $extension;
-           $newImagePath = 'certificates/' . $newImageName;
+           $newImagePath = '' . $newImageName;
            
            // Asegurarse de que la ruta no existe ya
            $counter = 1;
-           while (Storage::disk('public')->exists($newImagePath)) {
+           while (Storage::disk('certificates')->exists($newImagePath)) {
                $newImageName = $baseName . '_with_qr_' . $counter . '.' . $extension;
-               $newImagePath = 'certificates/' . $newImageName;
+               $newImagePath = '' . $newImageName;
                $counter++;
                
                // Evitar bucles infinitos
                if ($counter > 10) {
                    $newImageName = $baseName . '_with_qr_' . time() . '.' . $extension;
-                   $newImagePath = 'certificates/' . $newImageName;
+                   $newImagePath = '' . $newImageName;
                    break;
                }
            }
            
-           $newImageFullPath = Storage::disk('public')->path($newImagePath);
+           $newImageFullPath = Storage::disk('certificates')->path($newImagePath);
            
            // Crear el directorio si no existe
            $directory = dirname($newImageFullPath);

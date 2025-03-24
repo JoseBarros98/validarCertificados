@@ -24,12 +24,12 @@ class DirectDownloadController extends Controller
             // Determinar qué imagen usar (con QR o sin QR)
             $imagePath = $certificate->image_with_qr ?? $certificate->certificate_image;
             
-            if (!$imagePath || !Storage::disk('public')->exists($imagePath)) {
+            if (!$imagePath || !Storage::disk('certificates')->exists($imagePath)) {
                 return response()->json(['error' => 'Imagen no encontrada'], 404);
             }
             
             // Obtener la ruta completa del archivo
-            $fullPath = Storage::disk('public')->path($imagePath);
+            $fullPath = Storage::disk('certificates')->path($imagePath);
             
             // Verificar si el archivo existe físicamente
             if (!file_exists($fullPath)) {

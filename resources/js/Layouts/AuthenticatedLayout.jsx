@@ -135,7 +135,6 @@ export default function Authenticated({ user, header, children, flash }) {
                   </Dropdown.Trigger>
 
                   <Dropdown.Content>
-                    <Dropdown.Link href={route("profile.edit")}>Perfil</Dropdown.Link>
                     <Dropdown.Link href={route("logout")} method="post" as="button">
                       Cerrar Sesión
                     </Dropdown.Link>
@@ -208,7 +207,6 @@ export default function Authenticated({ user, header, children, flash }) {
             </div>
 
             <div className="mt-3 space-y-1">
-              <ResponsiveNavLink href={route("profile.edit")}>Perfil</ResponsiveNavLink>
               <ResponsiveNavLink method="post" href={route("logout")} as="button">
                 Cerrar Sesión
               </ResponsiveNavLink>
@@ -231,7 +229,6 @@ export default function Authenticated({ user, header, children, flash }) {
             <div className="text-sm text-gray-500">
               © {new Date().getFullYear()} Instituto Superior Politécnico Internacional
             </div>
-            <div className="text-sm text-gray-500">Panel de Administración v1.0.0</div>
           </div>
         </div>
       </footer>

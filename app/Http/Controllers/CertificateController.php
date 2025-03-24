@@ -99,7 +99,7 @@ class CertificateController extends Controller
 
         if ($request->hasFile('certificate_image')) {
             // Guardar la imagen original
-            $path = $request->file('certificate_image')->store('certificates', 'public');
+            $path = $request->file('certificate_image')->store('', 'certificates');
             
             // Añadir el QR a la imagen
             $pathWithQr = $this->certificateImageService->addQrCodeToImage($path, $certificate->code);
@@ -107,7 +107,7 @@ class CertificateController extends Controller
             // Si se procesó correctamente, usar la nueva imagen
             if ($pathWithQr) {
                 // Eliminar la imagen original
-                Storage::disk('public')->delete($path);
+                Storage::disk('certificates')->delete($path);
                 $certificate->certificate_image = $pathWithQr;
             } else {
                 $certificate->certificate_image = $path;
@@ -124,6 +124,20 @@ class CertificateController extends Controller
      */
     public function show(Certificate $certificate)
     {
+        // Asumiendo que $certificate->image contiene el nombre del archivo completo
+        // Por ejemplo: "LJKf0oBO3AwRPrTZpLHQ90RKIaqi4UbpEn7qIh89_with_qr.png"
+        
+        // Genera la URL correcta para acceder a la imagen desde el navegador
+        $certificate->image_url = asset('certificates/' . $certificate->certificate_image);
+        
+        // Si quieres verificar que todo está correcto, puedes añadir esta información de depuración
+        $certificate->debug = [
+            'filename' => $certificate->image,
+            'url' => $certificate->image_url,
+            'physical_path' => public_path('certificates/' . $certificate->certificate_image),
+            'exists' => file_exists(public_path('certificates/' . $certificate->certificate_image))
+        ];
+        
         return Inertia::render('Admin/Certificates/Show', [
             'certificate' => $certificate
         ]);
@@ -162,11 +176,11 @@ class CertificateController extends Controller
         if ($request->hasFile('certificate_image')) {
             // Eliminar imagen anterior si existe
             if ($certificate->certificate_image) {
-                Storage::disk('public')->delete($certificate->certificate_image);
+                Storage::disk('certificates')->delete($certificate->certificate_image);
             }
             
             // Guardar la nueva imagen
-            $path = $request->file('certificate_image')->store('certificates', 'public');
+            $path = $request->file('certificate_image')->store('', 'certificates');
             
             // Añadir el QR a la imagen
             $pathWithQr = $this->certificateImageService->addQrCodeToImage($path, $certificate->code);
@@ -174,7 +188,7 @@ class CertificateController extends Controller
             // Si se procesó correctamente, usar la nueva imagen
             if ($pathWithQr) {
                 // Eliminar la imagen original
-                Storage::disk('public')->delete($path);
+                Storage::disk('certificates')->delete($path);
                 $certificate->certificate_image = $pathWithQr;
             } else {
                 $certificate->certificate_image = $path;
@@ -249,7 +263,7 @@ class CertificateController extends Controller
             $imagePath = $certificate->image_with_qr;
             
             // Si no existe la imagen con QR, generarla
-            if (!$imagePath || !Storage::disk('public')->exists($imagePath)) {
+            if (!$imagePath || !Storage::disk('certificates')->exists($imagePath)) {
                 // Verificar si existe la imagen original
                 if (!$certificate->certificate_image || !Storage::disk('public')->exists($certificate->certificate_image)) {
                     return back()->with('error', 'No se encontró la imagen del certificado.');
@@ -270,12 +284,12 @@ class CertificateController extends Controller
             }
             
             // Verificar si existe la imagen después de intentar generarla
-            if (!$imagePath || !Storage::disk('public')->exists($imagePath)) {
+            if (!$imagePath || !Storage::disk('certificates')->exists($imagePath)) {
                 return back()->with('error', 'No se pudo generar la imagen del certificado.');
             }
             
             // Obtener la ruta completa del archivo
-            $fullPath = Storage::disk('public')->path($imagePath);
+            $fullPath = Storage::disk('certificates')->path($imagePath);
             
             // Normalizar la ruta (convertir todas las barras a la misma dirección)
             $fullPath = str_replace('\\', '/', $fullPath);

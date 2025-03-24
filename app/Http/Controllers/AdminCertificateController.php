@@ -36,7 +36,7 @@ class AdminCertificateController extends Controller
 
         // Procesar la imagen si se ha subido
         if ($request->hasFile('certificate_image')) {
-            $path = $request->file('certificate_image')->store('certificates', 'public');
+            $path = $request->file('certificate_image')->store('', 'certificates');
             $validated['certificate_image'] = $path;
         }
 
@@ -48,6 +48,20 @@ class AdminCertificateController extends Controller
 
     public function show(Certificate $certificate)
     {
+        // Asumiendo que $certificate->image contiene el nombre del archivo completo
+        // Por ejemplo: "LJKf0oBO3AwRPrTZpLHQ90RKIaqi4UbpEn7qIh89_with_qr.png"
+        
+        // Genera la URL correcta para acceder a la imagen desde el navegador
+        $certificate->image_url = asset('certificates/' . $certificate->certificate_image);
+        
+        // Si quieres verificar que todo está correcto, puedes añadir esta información de depuración
+        $certificate->debug = [
+            'filename' => $certificate->image,
+            'url' => $certificate->image_url,
+            'physical_path' => public_path('certificates/' . $certificate->certificate_image),
+            'exists' => file_exists(public_path('certificates/' . $certificate->certificate_image))
+        ];
+        
         return Inertia::render('Admin/Certificates/Show', [
             'certificate' => $certificate
         ]);
@@ -75,10 +89,10 @@ class AdminCertificateController extends Controller
         if ($request->hasFile('certificate_image')) {
             // Eliminar la imagen anterior si existe
             if ($certificate->certificate_image) {
-                Storage::disk('public')->delete($certificate->certificate_image);
+                Storage::disk('certificates')->delete($certificate->certificate_image);
             }
             
-            $path = $request->file('certificate_image')->store('certificates', 'public');
+            $path = $request->file('certificate_image')->store('', 'certificates');
             $validated['certificate_image'] = $path;
         } else {
             // Mantener la imagen existente
